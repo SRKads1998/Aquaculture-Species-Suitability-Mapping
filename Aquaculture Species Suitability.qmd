@@ -123,8 +123,6 @@ bathymetry_cropped <- crop(bathymetry, sst_stack_mean)
 
 bathymetry_resample <- resample(bathymetry_cropped, sst_stack_mean, method = "near")
 
-compareGeom(bathymetry_resample, sst_stack_mean)
-
 
 #match the crs of the new resampled object
 crs(bathymetry_resample) <- crs(sst_stack_mean)
@@ -204,7 +202,7 @@ oyster_eez_zones <- wc_eez %>%
 
 # create final oyster map
 
-tm_shape(eez_suitability_plot) +
+tm_shape(oyster_eez_zones) +
   tm_polygons(
     fill = "lyr1",
     fill.scale = tm_scale(
