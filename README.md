@@ -12,10 +12,10 @@ This repository and it's contents are to serve as a way to analyze Economic Excl
 
 ## Repository Contents
 
-```         
-├── .gitignore
+```
 ├── .Rhistory
-├── data
+├── .gitignore
+├───   data
 │   ├── average_annual_sst_2008.tif
 │   ├── average_annual_sst_2009.tif
 │   ├── average_annual_sst_2010.tif
