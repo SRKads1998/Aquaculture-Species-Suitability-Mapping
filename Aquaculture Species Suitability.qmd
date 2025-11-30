@@ -1,19 +1,20 @@
 ---
 title: "Aquaculture Mapping"
 author: "Stephan Kadonoff"
-date: 11/21/2025
+date: 11/28/2025
 format: html
 editor: visual
 execute: 
   echo: true
   message: false
+  warning: false
 ---
 
 ## Section 1: Importing Data and Initial Exploration
 
 ```{r}
 #Read in relevant libraries
-#read in relevant libraries
+
 #| message: false
 #| warning: false
 library(terra) # raster handling
@@ -30,7 +31,8 @@ library(stars)
 
 ```{r}
 #read in data
-
+#| message: false
+#| warning: false
 wc_eez <- st_read(here("data", "wc_regions_clean.shp"))
 
 bathymetry <- rast(here("data", "depth.tif"))
@@ -52,6 +54,8 @@ sst_stack_mean <- mean(sst_stack)
 ```
 
 ```{r}
+#| message: false
+#| warning: false
 #check the CRSs
 crs(wc_eez)
 crs(bathymetry)
@@ -59,6 +63,8 @@ crs(sst_2008)
 ```
 
 ```{r}
+#| message: false
+#| warning: false
 #check to make sure the crs match
 if(st_crs(wc_eez) == st_crs(bathymetry) &
    st_crs(bathymetry) == st_crs(sst_2008)) {
@@ -69,16 +75,11 @@ if(st_crs(wc_eez) == st_crs(bathymetry) &
 ```
 One thing to note is that zone 5, the northern most zone, has been included, but we will want to remove it since it includes geographic areas outside of the United States.
 
-```{r}
-# filter out zone 5 from the wc_eez object
-
-```
-
-
-
 ## Section 2: Process Data
 
 ```{r}
+#| message: false
+#| warning: false
 # find the Celsius value, as the stack is currently in Kelvin
 sst_celsius <- (sst_stack_mean - 273.15)
 sst_celsius
@@ -139,6 +140,8 @@ To find suitable locations for marine aquaculture, we’ll need to find location
 -   find locations that satisfy both SST and depth conditions
 
 ```{r}
+#| message: false
+#| warning: false
 #reclassify the celcius corrected sst object w/ the oyster temperature range matrix
 reclass_oyster_temp <- classify(sst_celsius, oyster_temp_matrix)
 
@@ -160,12 +163,16 @@ oyster_suitable_locs <- lapp(c(reclass_oyster_temp, reclass_oyster_depth), suiti
 We have successfully found the areas which meet both the depth and temperature parameters. Now we need to isolate them based on the areas found in the wc_eez object.
 
 ```{r}
+#| message: false
+#| warning: false
 # vectorize the wc_eez dataframe for cropping and mapping
 wc_eez_vectorized <- vect(wc_eez)
 plot(wc_eez_vectorized)
 ```
 
 ```{r}
+#| message: false
+#| warning: false
 # utilize the crop function to find the areas where oyster suitibility matches the wc_eez zones
 oysters_eez <- crop(oyster_suitable_locs, wc_eez_vectorized)
 plot(oysters_eez)
@@ -205,17 +212,11 @@ tm_shape(eez_suitability_plot) +
  
 ```
 
-One thing to note is that zone 5, the northern most zone, has been included, but we will want to remove it since it includes geographic areas outside of the United States.
-
-```{r}
-
-
-
-```
-
 ### Recreate above workflow as a function, and then utilize for mussels
 
 ```{r}
+#| message: false
+#| warning: false
 species_suitibility_function <- function(min_temp, max_temp,
                                          min_depth, max_depth,
                                          species_name) {
@@ -276,6 +277,7 @@ return(map)
 }
 ```
 
+Now that we have the function developed, we can apply the parameters found within the SeaLifeBase website for Blue Mussels. This will provide a map detailing the quantity of suitable area per exclusion zone. 
 ```{r}
 species_suitibility_function(min_temp = 4.5,
                              max_temp = 16,
@@ -284,5 +286,8 @@ species_suitibility_function(min_temp = 4.5,
                              species_name = "Blue Mussels")
 ```
 
+## Section 3 Written Reflection
 
+This analysis provided a better understanding of the areas along the west coast of the United States that may have the best opportunities for aquaculture practices for two of the most common species that can be harvested along much of the seaboard. Besides the two species, Oysters and Blue Mussels, which we looked at, this same function can be utilized for other species. Now, as long as we can provide the parameters for depth and temperature, this function can be utilized for any number of aquaculture practices. 
 
+I did find it somewhat interesting how little area there was that was habitable, but I quickly realized much of that had to do with the depth at sea. I wonder if there would be a way to create floating lines or cages which could be a way to grow mussels or oysters ins shallower waters abover open ocean. 
